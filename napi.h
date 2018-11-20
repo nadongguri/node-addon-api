@@ -1775,6 +1775,14 @@ namespace Napi {
       static const napi_node_version* GetNodeVersion(Env env);
   };
 
+#if (NAPI_VERSION > 2)
+  class Cleanup {
+    public:
+      static void AddCleanupHook(Env env, void (*fun)(void* arg), void* arg);
+      static void RemoveCleanupHook(Env env, void (*fun)(void* arg), void *arg);
+  };
+#endif
+
 } // namespace Napi
 
 // Inline implementations of all the above class methods are included here.
