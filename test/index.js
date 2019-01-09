@@ -68,7 +68,6 @@ if (typeof global.gc === 'function') {
     console.log(`Running test '${name}'`);
     require('./' + name);
   });
-
   console.log('\nAll tests passed!');
 } else {
   // Make it easier to run with the correct (version-dependent) command-line args.
