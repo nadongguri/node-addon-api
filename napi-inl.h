@@ -3663,9 +3663,37 @@ inline const napi_node_version* VersionManagement::GetNodeVersion(Env env) {
 
 #if (NAPI_VERSION > 2)
 ////////////////////////////////////////////////////////////////////////////////
-// Cleanup class
+// EnvCleanup class
 ////////////////////////////////////////////////////////////////////////////////
+inline EnvCleanup::EnvCleanup(napi_env env) {
+  _env = env;
+}
 
+/*
+inline EnvCleanup::EnvCleanup(napi_env env,
+                              const void (*fun)(void* arg),
+                              const void* arg) {
+}
+*/
+
+inline EnvCleanup::~EnvCleanup() {
+}
+
+inline Napi::Env EnvCleanup::Env() const {
+  return Napi::Env(_env);
+}
+
+inline void EnvCleanup::AddHook(napi_env env, void (*fun)(void *arg), void* arg) {
+  _env = env;
+  _hooks.push_back(CleanupHookCallback { fun, arg });
+  return;
+}
+inline void EnvCleanup::RemoveHook(napi_env env, void (*fun)(void *arg), void* arg) {
+  _env = env;
+  _hooks.push_back(CleanupHookCallback { fun, arg });
+  return;
+}
+/*
 inline void Cleanup::AddCleanupHook(Env env, void (*fun)(void* arg), void* arg) {
   napi_status status = napi_add_env_cleanup_hook(env, fun, arg);
   NAPI_THROW_IF_FAILED_VOID(env, status);
@@ -3677,6 +3705,7 @@ inline void Cleanup::RemoveCleanupHook(Env env, void (*fun)(void* arg), void *ar
   NAPI_THROW_IF_FAILED_VOID(env, status);
   return;
 }
+*/
 #endif
 
 // These macros shouldn't be useful in user code.

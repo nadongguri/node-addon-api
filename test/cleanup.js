@@ -19,7 +19,7 @@ function test(binding) {
     return;
   binding.cleanup.doCleanup();
   const common = require('../../common');
-  const assert = require('assert');                                     
+  const assert = require('assert');                                
                                                                         
   if (process.argv[2] === 'child') {                                    
 	    require(`./build/${common.buildType}/binding`);                     
@@ -28,5 +28,4 @@ function test(binding) {
 			    child_process.spawnSync(process.execPath, [__filename, 'child']); 
 		  assert.strictEqual(stdout.toString().trim(), 'cleanup(42)');        
   }                                                                     
-
 }

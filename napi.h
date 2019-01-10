@@ -1778,21 +1778,24 @@ namespace Napi {
 #if (NAPI_VERSION > 2)
   class EnvCleanup {
     public:
-	  virtual ~EnvCleanup();
+      virtual ~EnvCleanup();
       Napi::Env Env() const;
     protected:
+      explicit EnvCleanup(napi_env env);
+      /*
       explicit EnvCleanup(napi_env env,
-						  const void (*fun)(void* arg),
-						  const void* arg);
+                          const void (*fun)(void* arg),
+                          const void* arg);
+      */
       void AddHook(napi_env env, void (*fun)(void* arg), void* arg);
       void RemoveHook(napi_env env, void (*fun)(void* arg), void *arg);
-	private:
+    private:
       napi_env _env;
-	  struct CleanupHookCallback {
-	    void (*fn_)(void*);
-	    void* arg_;
-	  };
-	  vector<CleanupHookCallback> _hooks;
+      struct CleanupHookCallback {
+        void (*fun)(void*);
+        void* arg;
+      };
+      std::vector<CleanupHookCallback> _hooks;
   };
 #endif
 

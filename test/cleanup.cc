@@ -10,17 +10,22 @@ class TestCleanupHook : public EnvCleanup {
     static void DoCleanup(const CallbackInfo& info) {
 	  int secret = 42;
 	  int wrongSecret = 17;
-	  TestCleanupHook* cleanupHook = new TestCleanupHook(info.Env(), Cleanup, &wrongSecret);
+	  TestCleanupHook* cleanupHook = new TestCleanupHook(info);
+	  cleanupHook->AddHook(info.Env(), Cleanup, &secret);
+	  cleanupHook->AddHook(info.Env(), Cleanup, &wrongSecret);
 	}
   private:
+    TestCleanupHook(CallbackInfo info) : EnvCleanup(info.Env()) {}
+    /*
     TestCleanupHook(Env env, void (*fun)(void* arg), void* arg)
 	  : EnvCleanup(env, fun, arg) {}
-	static Cleanup(void* arg) {
+	  */
+	static void Cleanup(void* arg) {
 	  printf("cleanup(%d)\n", *static_cast<int*>(arg));
-	}
+	};
 };
 
-Object InitAsyncWorker(Env env) {
+Object InitCleanup(Env env) {
   Object exports = Object::New(env);
   exports["doCleanup"] = Function::New(env, TestCleanupHook::DoCleanup);
   return exports;
