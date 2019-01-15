@@ -11,11 +11,12 @@ class TestCleanupHook : public EnvCleanup {
 	  int secret = 42;
 	  int wrongSecret = 17;
 	  TestCleanupHook* cleanupHook = new TestCleanupHook(info);
-	  cleanupHook->AddHook(info.Env(), Cleanup, &secret);
-	  cleanupHook->AddHook(info.Env(), Cleanup, &wrongSecret);
+	  cleanupHook->AddHook(Cleanup, &secret);
+	  cleanupHook->AddHook(Cleanup, &wrongSecret);
+	  printf("+_+\n");
 	}
   private:
-    TestCleanupHook(CallbackInfo info) : EnvCleanup(info.Env()) {}
+    TestCleanupHook(const CallbackInfo& info) : EnvCleanup(info.Env()) {}
     /*
     TestCleanupHook(Env env, void (*fun)(void* arg), void* arg)
 	  : EnvCleanup(env, fun, arg) {}

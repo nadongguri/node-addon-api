@@ -1779,7 +1779,7 @@ namespace Napi {
   class EnvCleanup {
     public:
       virtual ~EnvCleanup();
-      Napi::Env Env() const;
+      //Napi::Env Env() const;
     protected:
       explicit EnvCleanup(napi_env env);
       /*
@@ -1787,15 +1787,15 @@ namespace Napi {
                           const void (*fun)(void* arg),
                           const void* arg);
       */
-      void AddHook(napi_env env, void (*fun)(void* arg), void* arg);
-      void RemoveHook(napi_env env, void (*fun)(void* arg), void *arg);
+      void AddHook(void (*fun)(void* arg), void* arg);
+      void RemoveHook(void (*fun)(void* arg), void *arg);
     private:
       napi_env _env;
-      struct CleanupHookCallback {
+      struct EnvCleanupHook {
         void (*fun)(void*);
         void* arg;
       };
-      std::vector<CleanupHookCallback> _hooks;
+      std::vector<EnvCleanupHook> _hooks;
   };
 #endif
 
