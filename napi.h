@@ -1782,11 +1782,9 @@ namespace Napi {
       //Napi::Env Env() const;
     protected:
       explicit EnvCleanup(napi_env env);
-      /*
       explicit EnvCleanup(napi_env env,
-                          const void (*fun)(void* arg),
-                          const void* arg);
-      */
+                          void (*fun)(void* arg),
+                          void* arg);
       void AddHook(void (*fun)(void* arg), void* arg);
       void RemoveHook(void (*fun)(void* arg), void *arg);
     private:

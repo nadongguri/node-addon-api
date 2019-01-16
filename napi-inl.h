@@ -3669,58 +3669,39 @@ inline EnvCleanup::EnvCleanup(napi_env env) {
   _env = env;
 }
 
-/*
 inline EnvCleanup::EnvCleanup(napi_env env,
-                              const void (*fun)(void* arg),
-                              const void* arg) {
+                              void (*fun)(void* arg),
+                              void* arg) {
+  _env = env;
+  napi_status status = napi_add_env_cleanup_hook(_env, fun, arg);
+  NAPI_THROW_IF_FAILED_VOID(_env, status);
+  _hooks.push_back(EnvCleanupHook { fun, arg });
 }
-*/
 
 inline EnvCleanup::~EnvCleanup() {
+  for (auto hook = _hooks.begin(); hook != _hooks.end(); ++hook) {
+    napi_status status = napi_remove_env_cleanup_hook(_env, hook->fun, hook->arg);
+    NAPI_THROW_IF_FAILED_VOID(_env, status);
+  }
+  _hooks.clear();
 }
-
-/*
-inline Napi::Env EnvCleanup::Env() const {
-  return Napi::Env(_env);
-}
-*/
 
 inline void EnvCleanup::AddHook(void (*fun)(void *arg), void* arg) {
   napi_status status = napi_add_env_cleanup_hook(_env, fun, arg);
   NAPI_THROW_IF_FAILED_VOID(_env, status);
   _hooks.push_back(EnvCleanupHook { fun, arg });
-  for ( const EnvCleanupHook& hook : _hooks ) {
-	  printf("+_+ %p %p %d\n", (void*)&hook, (void*)hook.fun, *(int*)(hook.arg));
-  }
-  return;
 }
+
 inline void EnvCleanup::RemoveHook(void (*fun)(void *arg), void* arg) {
   napi_status status = napi_remove_env_cleanup_hook(_env, fun, arg);
   NAPI_THROW_IF_FAILED_VOID(_env, status);
-  /*
-  template<class T, class UnaryPredicate>
-	  void Vec_RemoveAll_If(vector<T>& vec, const vector<UnaryPredicate> predicates)
-	  {
-		      for (const UnaryPredicate& predicate : predicates)
-				          vec.erase(remove_if(vec.begin(), vec.end(), predicate), vec.end());
-	  }
-	  */
-  //_hooks.erase(std::remove_if(_hooks.begin(), _hooks.end(), EnvCleanupHook { fun, arg }), _hooks.end()); 
-  return;
+  for (auto hook = _hooks.begin(); hook != _hooks.end(); ++hook) {
+    if ((hook->fun == fun) && (hook->arg == arg)) {
+      _hooks.erase(hook);
+	  break;
+	}
+  }  
 }
-/*
-inline void Cleanup::AddCleanupHook(Env env, void (*fun)(void* arg), void* arg) {
-  napi_status status = napi_add_env_cleanup_hook(env, fun, arg);
-  NAPI_THROW_IF_FAILED_VOID(env, status);
-  return;
-}
-
-inline void Cleanup::RemoveCleanupHook(Env env, void (*fun)(void* arg), void *arg)  {
-  napi_status status = napi_remove_env_cleanup_hook(env, fun, arg);
-  NAPI_THROW_IF_FAILED_VOID(env, status);
-  return;
-}
-*/
 #endif
 
 // These macros shouldn't be useful in user code.
