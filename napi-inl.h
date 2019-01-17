@@ -3663,19 +3663,44 @@ inline const napi_node_version* VersionManagement::GetNodeVersion(Env env) {
 
 #if (NAPI_VERSION > 2)
 ////////////////////////////////////////////////////////////////////////////////
-// Cleanup class
+// EnvCleanup class
 ////////////////////////////////////////////////////////////////////////////////
-
-inline void Cleanup::AddCleanupHook(Env env, void (*fun)(void* arg), void* arg) {
-  napi_status status = napi_add_env_cleanup_hook(env, fun, arg);
-  NAPI_THROW_IF_FAILED_VOID(env, status);
-  return;
+inline EnvCleanup::EnvCleanup(napi_env env) {
+  _env = env;
 }
 
-inline void Cleanup::RemoveCleanupHook(Env env, void (*fun)(void* arg), void *arg)  {
-  napi_status status = napi_remove_env_cleanup_hook(env, fun, arg);
-  NAPI_THROW_IF_FAILED_VOID(env, status);
-  return;
+inline EnvCleanup::EnvCleanup(napi_env env,
+                              void (*fun)(void* arg),
+                              void* arg) {
+  _env = env;
+  napi_status status = napi_add_env_cleanup_hook(_env, fun, arg);
+  NAPI_THROW_IF_FAILED_VOID(_env, status);
+  _hooks.push_back(EnvCleanupHook { fun, arg });
+}
+
+inline EnvCleanup::~EnvCleanup() {
+  for (auto hook = _hooks.begin(); hook != _hooks.end(); ++hook) {
+    napi_status status = napi_remove_env_cleanup_hook(_env, hook->fun, hook->arg);
+    NAPI_THROW_IF_FAILED_VOID(_env, status);
+  }
+  _hooks.clear();
+}
+
+inline void EnvCleanup::AddHook(void (*fun)(void *arg), void* arg) {
+  napi_status status = napi_add_env_cleanup_hook(_env, fun, arg);
+  NAPI_THROW_IF_FAILED_VOID(_env, status);
+  _hooks.push_back(EnvCleanupHook { fun, arg });
+}
+
+inline void EnvCleanup::RemoveHook(void (*fun)(void *arg), void* arg) {
+  napi_status status = napi_remove_env_cleanup_hook(_env, fun, arg);
+  NAPI_THROW_IF_FAILED_VOID(_env, status);
+  for (auto hook = _hooks.begin(); hook != _hooks.end(); ++hook) {
+    if ((hook->fun == fun) && (hook->arg == arg)) {
+      _hooks.erase(hook);
+	  break;
+	}
+  }  
 }
 #endif
 
