@@ -1773,6 +1773,28 @@ namespace Napi {
       static const napi_node_version* GetNodeVersion(Env env);
   };
 
+#if (NAPI_VERSION > 2)
+  class EnvCleanup {
+    public:
+      virtual ~EnvCleanup();
+      //Napi::Env Env() const;
+    protected:
+      explicit EnvCleanup(napi_env env);
+      explicit EnvCleanup(napi_env env,
+                          void (*fun)(void* arg),
+                          void* arg);
+      void AddHook(void (*fun)(void* arg), void* arg);
+      void RemoveHook(void (*fun)(void* arg), void *arg);
+    private:
+      napi_env _env;
+      struct EnvCleanupHook {
+        void (*fun)(void*);
+        void* arg;
+      };
+      std::vector<EnvCleanupHook> _hooks;
+  };
+#endif
+
 } // namespace Napi
 
 // Inline implementations of all the above class methods are included here.
